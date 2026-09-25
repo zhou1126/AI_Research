@@ -1,0 +1,12 @@
+# Credentials and generated files
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
+*.pem
+.DS_Store
+node_modules/
+.cache/
+.wrangler/
+dist/

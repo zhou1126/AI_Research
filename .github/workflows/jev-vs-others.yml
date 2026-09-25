@@ -1,0 +1,33 @@
+name: Validate AI Decision Lab
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: jev_vs_others
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: jev_vs_others/.nvmrc
+          cache: npm
+          cache-dependency-path: jev_vs_others/package-lock.json
+      - run: npm ci
+      - run: npm run verify
+      - name: Exercise server without API secrets
+        shell: bash
+        run: |
+          CODESPACES=true CODESPACE_NAME=ci-chess npm run dev -- --host 0.0.0.0 > /tmp/chess-lab-dev.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          SMOKE_EXTERNAL_ORIGIN=https://ci-chess-3000.app.github.dev npm run smoke:local || { cat /tmp/chess-lab-dev.log; exit 1; }
+          npm run smoke:worker || { cat /tmp/chess-lab-dev.log; exit 1; }
+      - name: Verify headless benchmark without .env
+        run: npm run benchmark -- --a=mcts --b=random --pairs=1 --iterations=25 --depth=2 --max-plies=4

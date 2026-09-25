@@ -1,0 +1,31 @@
+{
+  "name": "AI Research \u00b7 JEV Decision Lab",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:5.2.1-22-bookworm",
+  "remoteUser": "node",
+  "hostRequirements": {
+    "cpus": 2,
+    "memory": "4gb"
+  },
+  "forwardPorts": [
+    3000
+  ],
+  "portsAttributes": {
+    "3000": {
+      "label": "AI Decision Lab",
+      "onAutoForward": "notify",
+      "protocol": "http"
+    }
+  },
+  "postCreateCommand": "npm ci",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint"
+      ],
+      "settings": {
+        "remote.autoForwardPorts": false
+      }
+    }
+  },
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}/jev_vs_others"
+}
