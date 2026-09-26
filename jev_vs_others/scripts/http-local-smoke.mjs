@@ -9,7 +9,10 @@ while (true) {
 assert.equal((await fetch(base)).status, 200);
 const notebookPage = await fetch(base + '/notebook');
 assert.equal(notebookPage.status, 200);
-assert.match(await notebookPage.text(), /Three basic JEV functions/);
+const notebookHtml = await notebookPage.text();
+assert.match(notebookHtml, /Start with any statement/);
+assert.match(notebookHtml, /Live TypeSafe request JSON/);
+assert.match(notebookHtml, /Three basic JEV functions/);
 const overviewPage = await fetch(base + '/jev');
 assert.equal(overviewPage.status, 200);
 assert.match(await overviewPage.text(), /JEV MODEL BRIEFING/);
@@ -26,6 +29,8 @@ const invalidOverview = await fetch(base + '/api/jev-overview', { method: 'POST'
 assert.equal(invalidOverview.status, 400);
 const invalidNotebook = await fetch(base + '/api/notebook', { method: 'POST', headers: { Origin: base, 'Content-Type': 'application/json' }, body: JSON.stringify({ mode: 'classify', engine: 'jev', id: 'not-a-question' }) });
 assert.equal(invalidNotebook.status, 400);
+const invalidPlayground = await fetch(base + '/api/notebook', { method: 'POST', headers: { Origin: base, 'Content-Type': 'application/json' }, body: JSON.stringify({ mode: 'playground', engine: 'jev', draft: { state: 'A non-financial statement', questions: [] } }) });
+assert.equal(invalidPlayground.status, 400);
 const roomPage = await fetch(base + '/room');
 assert.equal(roomPage.status, 200);
 assert.match(await roomPage.text(), /Before you begin/);

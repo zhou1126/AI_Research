@@ -1,6 +1,7 @@
 import { completionBudget, providerConfig, type Environment } from '../providers';
 import { distribution, isLabel, jevBatchBody, jevBody, jevPrimitiveBody, llmBody, PRIMITIVE_QUESTION, type JevPrimitive } from './core';
 import type { Example, Label } from './data';
+import { buildPlaygroundBody, parsePlaygroundResponse } from './playground';
 export type RemoteEngine = 'jev' | 'openai' | 'deepseek';
 function record(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Provider returned an invalid object.');
@@ -77,4 +78,12 @@ export async function classifyJevBatch(examples: Example[], env: Environment, si
       request: { batched: true, questionId: example.id }, response: parsed.response.answers.sentiment };
   });
   return { rows, model, elapsedMs, request: body, response: { model, answers: Object.fromEntries(rows.map(row => [row.id, row.response])) } };
+}
+
+export async function classifyJevPlayground(draft: unknown, env: Environment, signal?: AbortSignal) {
+  const config = providerConfig(env, 'jev');
+  const body = buildPlaygroundBody(draft, config.model);
+  const { data, elapsedMs } = await send('jev', body, env, signal);
+  const parsed = parsePlaygroundResponse(data, body);
+  return { engine: 'jev' as const, model: parsed.model, inferenceMs: elapsedMs, request: body, response: parsed };
 }
