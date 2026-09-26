@@ -7,6 +7,7 @@ Research applications and reproducible experiments.
 The application is in [`jev_vs_others/`](jev_vs_others/README.md).
 
 - **JEV notebook** — runnable Choice, Score and Noul examples; compare JEV, OpenAI/DeepSeek and FinBERT on 50 labeled classification questions, with runtime and quality metrics.
+- **About Jev** — slide-style briefing on the model, typed outputs, token limits, published speed and pricing, evidence limits, and a live roster-to-vendor mapping example.
 - **Chess lab** — legal chess with JEV, LLMs and MCTS, inspectable decisions, book retrieval and repeated-game experiments.
 - **Room planning lab** — compare JEV and MCTS in an editable room, with step controls and action probabilities on the floor.
 

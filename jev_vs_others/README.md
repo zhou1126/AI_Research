@@ -1,6 +1,6 @@
 # AI / Decision Lab
 
-A local research app with three tabs: chess comparisons, room-planning experiments, and a JEV classification notebook. **Chess lab** compares JEV, MCTS, OpenAI, DeepSeek and a random baseline. **Room planning lab** compares JEV with MCTS on the same grid, rules and goal. **JEV notebook** demonstrates typed API calls and compares JEV, a constrained LLM, and a real BERT classifier.
+A local research app with four tabs: the JEV notebook, an About Jev slide briefing, chess comparisons, and room-planning experiments. **Chess lab** compares JEV, MCTS, OpenAI, DeepSeek and a random baseline. **Room planning lab** compares JEV with MCTS on the same grid, rules and goal. **JEV notebook** demonstrates typed API calls and compares JEV, a constrained LLM, and a real BERT classifier.
 
 ## Run
 
@@ -34,6 +34,10 @@ JEV defaults to the official endpoint `https://api.typesafe.ai/v1/systemone` and
 - The **Move journal** restores the position before a recorded move, its candidates, probabilities/search statistics and latency.
 - Export current-game **PGN** or **Decision JSON**. JSON includes settings, every move decision, token usage where available and completed pair records. Browser state is in memory: export before refreshing.
 - Optional FEN loading supports tactical positions. FEN syntax is validated; historical reachability of arbitrary custom positions is not proven. Repetition history begins at the imported position.
+
+## About Jev
+
+Open **About Jev** or visit `/jev` for a five-slide briefing on the public model interface, input limits, output types, TypeSafe's published speed/pricing example, and what its accuracy evidence does and does not establish. The source links are on the relevant slides. A live synthetic roster-to-vendor example sends five Choice questions in one JEV request, shows measured latency and returned token usage, computes accuracy against five hand-labeled records, and routes low-confidence or unmatched choices to review. No vendor record is changed. The key stays server-side; no paid call occurs until **Run live vendor mapping** is clicked. Reported provider figures can change, so check the linked sources for current pricing.
 
 ## JEV notebook
 
