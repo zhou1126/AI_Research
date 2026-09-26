@@ -7,14 +7,14 @@ A local research app with three tabs: chess comparisons, room-planning experimen
 Node 22.13+ is required.
 
 ```sh
-cd chess-lab # only when starting in the parent research workspace; a GitHub clone is already at the app root
+cd jev_vs_others # from the AI_Research repository root; Codespaces opens this folder automatically
 npm ci
 npm run dev -- --host 127.0.0.1
 ```
 
 Open http://localhost:3000. Port 3000 is fixed; stop another server using that port before starting a second instance.
 
-The app supports environment variables (including Codespaces secrets), a repository-root `.env`, or the existing parent `../.env`. Precedence is environment > repository `.env` > parent `.env`. All files are optional. Before starting, the app writes **only allowlisted chess variables** plus its trusted external origin into ignored, server-only `.dev.vars`. Restart after changing keys or models. Unrelated finance keys, GitHub tokens and database settings are not copied. The generated file is refreshed on every start, so removed settings cannot survive as stale secrets. See `.env.example` for supported names. The existing `DEEP_SEEK_*` spelling and `DEEPSEEK_*` aliases both work.
+The app supports environment variables (including Codespaces secrets), an app-folder `.env`, or the parent repository `../.env`. Precedence is environment > app `.env` > parent `.env`. All files are optional. Before starting, the app writes **only allowlisted chess variables** plus its trusted external origin into ignored, server-only `.dev.vars`. Restart after changing keys or models. Unrelated finance keys, GitHub tokens and database settings are not copied. The generated file is refreshed on every start, so removed settings cannot survive as stale secrets. See `.env.example` for supported names. The existing `DEEP_SEEK_*` spelling and `DEEPSEEK_*` aliases both work.
 
 JEV defaults to the official endpoint `https://api.typesafe.ai/v1/systemone` and model `jev-latest`. Override with `JEV_API_URL` / `JEV_MODEL`. OpenAI and DeepSeek use the model names in your `.env`; no model substitution is performed by the app. Providers may resolve aliases to another version, recorded in decisions. Keys never go to the browser or exports. Local keys are not automatically uploaded to hosting.
 
@@ -188,12 +188,12 @@ Tests cover legal move generation/resulting FENs, illegal move rejection without
 
 ## GitHub Codespaces
 
-The Git repository is the **`chess-lab/` directory** in the current research workspace. Push its contents as the repository root, including `.devcontainer/`, `.github/`, `package.json`, and `package-lock.json`. Do not upload the surrounding `.env`, `node_modules`, `.dev.vars`, or `dist`. After cloning from GitHub you are already at the app root: do not run `cd chess-lab` again.
+This app lives in **`AI_Research/jev_vs_others/`**. The repository-root `.devcontainer/devcontainer.json` opens that app folder and runs `npm ci` there. The repository-root `.github/workflows/jev-vs-others.yml` runs all app commands with `working-directory: jev_vs_others`. App source, images and lockfile remain together inside the folder. Credentials, downloaded weights, dependencies and generated build files are ignored.
 
 1. In GitHub, open the repository and choose **Code > Codespaces > Create codespace on main**. The checked-in dev container uses Node 22 on Debian Bookworm and runs `npm ci` automatically.
 2. For API players, configure account or repository **Codespaces secrets** (not Actions secrets): `JEV_API_KEY`, `OPENAI_API_KEY`, `OPENAI_MODEL`, `DEEP_SEEK_API_KEY`, and `DEEP_SEEK_MODEL`. Optional settings are listed in `.env.example`. Grant the secrets access to this repository. Keep your current model names; model access depends on your provider account. JEV defaults to `jev-latest`.
-3. Alternatively, create `.env` at the repository root from `.env.example` and fill it in inside the codespace. This file stays ignored. If using Codespaces secrets, no `.env` file is needed.
-4. Run `npm run dev`. Open port **3000** from the **Ports** panel. Keep its visibility **Private** because this app uses your API credits and has no separate app login. The app does not start automatically or make paid calls when the codespace opens.
+3. Alternatively, create `jev_vs_others/.env` from `jev_vs_others/.env.example` and fill it in inside the codespace. This file stays ignored. If using Codespaces secrets, no `.env` file is needed.
+4. Run `npm run dev` in the opened app folder. If your terminal is at the repository root, first run `cd jev_vs_others`. Open port **3000** from the **Ports** panel. Keep its visibility **Private** because this app uses your API credits and has no separate app login. The app does not start automatically or make paid calls when the codespace opens.
 5. If you add/change Codespaces secrets, stop and restart the codespace to refresh its environment, then run `npm run dev` again.
 
 Codespaces' exact forwarded HTTPS hostname is derived from its environment. Vite binds to `0.0.0.0`, permits that hostname, and uses its secure WebSocket for HMR. The API accepts that explicit origin without trusting arbitrary forwarded-host headers. Outside Codespaces, `APP_ORIGIN` may be set for another trusted reverse proxy.
@@ -207,7 +207,7 @@ npm run verify
 npm run smoke:local
 ```
 
-The GitHub Actions workflow runs a clean install, tests, type checking, production build, local HTTP smoke test, and a small headless benchmark on Ubuntu with Node 22. No API secrets are required for CI. Actual remote API checks remain opt-in with `npm run smoke:providers`.
+The GitHub Actions workflow runs a clean install, tests, type checking, production build, local HTTP smoke test, worker initialization check, and a small headless benchmark on Ubuntu with Node 22. No API secrets are required for CI. Actual remote API checks remain opt-in with `npm run smoke:providers`.
 
 References: [GitHub Node.js dev containers](https://docs.github.com/en/codespaces/setting-up-your-project-for-codespaces/adding-a-dev-container-configuration/setting-up-your-nodejs-project-for-codespaces), [Codespaces secrets](https://docs.github.com/en/codespaces/managing-your-codespaces/managing-your-account-specific-secrets-for-github-codespaces).
 
