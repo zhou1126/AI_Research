@@ -44,27 +44,15 @@ test('vendor demo sends five bounded choices in one server-side request and repo
   }
 });
 
-test('slide navigation keeps a single live mapping result while changing the confidence threshold', async () => {
-  const originalFetch = globalThis.fetch; let renderer!: ReactTestRenderer; let paidCalls = 0;
-  globalThis.fetch = async (url) => {
-    if (String(url) === '/api/config') return Response.json({ jev: { configured: true, model: 'jev-test' } });
-    paidCalls++;
-    return Response.json({ ...parseVendorResponse(fixture()), model: 'jev-fixture', elapsedMs: 120, request: vendorRequest('jev-test') });
-  };
+test('About Jev presents the architecture as a hypothesis and links to the agent tab', async () => {
+  let renderer!: ReactTestRenderer;
+  await act(async () => { renderer = create(React.createElement(JevOverview)); });
   try {
-    await act(async () => { renderer = create(React.createElement(JevOverview)); });
-    assert.match(label(renderer.root), /Jev turns a state/);
-    const agentButton = renderer.root.findAllByType('button').find(node => label(node) === 'Agent example')!;
-    await act(async () => agentButton.props.onClick());
-    assert.match(label(renderer.root), /Roster → approved vendor mapping/);
-    const run = renderer.root.findAllByType('button').find(node => label(node) === 'Run live vendor mapping')!;
-    await act(async () => { await run.props.onClick(); });
-    assert.equal(paidCalls, 1);
-    assert.match(label(renderer.root), /5\/5 correct on this synthetic sample/);
-    assert.match(label(renderer.root), /3\/5auto matched|3\/5auto matched/);
-    const slider = renderer.root.findByProps({ type: 'range' });
-    await act(async () => slider.props.onChange({ target: { value: '0.65' } }));
-    assert.equal(paidCalls, 1);
-    assert.match(label(renderer.root), /4\/5auto matched/);
-  } finally { await act(async () => renderer?.unmount()); globalThis.fetch = originalFetch; }
+    assert.ok(renderer.root.findAllByType('a').some(node => node.props.href === '/jev' && node.props['aria-current'] === 'page'));
+    assert.ok(renderer.root.findAllByType('a').some(node => node.props.href === '/agent'));
+    const hypothesis = renderer.root.findAllByType('button').find(node => label(node) === 'Our model hypothesis')!;
+    await act(async () => hypothesis.props.onClick());
+    assert.match(label(renderer.root), /not a verified network diagram/i);
+    assert.match(label(renderer.root), /parameter count/);
+  } finally { await act(async () => renderer.unmount()); }
 });

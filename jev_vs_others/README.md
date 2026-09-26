@@ -1,6 +1,6 @@
 # AI / Decision Lab
 
-A local research app with four tabs: the JEV notebook, an About Jev slide briefing, chess comparisons, and room-planning experiments. **Chess lab** compares JEV, MCTS, OpenAI, DeepSeek and a random baseline. **Room planning lab** compares JEV with MCTS on the same grid, rules and goal. **JEV notebook** demonstrates typed API calls and compares JEV, a constrained LLM, and a real BERT classifier.
+A local research app with five tabs, in order: About Jev, JEV notebook, Agent component, Chess lab, and Room planning lab. **Chess lab** compares JEV, MCTS, OpenAI, DeepSeek and a random baseline. **Room planning lab** compares JEV with MCTS on the same grid, rules and goal. **JEV notebook** demonstrates typed API calls and compares JEV, a constrained LLM, and a real BERT classifier.
 
 ## Run
 
@@ -37,7 +37,13 @@ JEV defaults to the official endpoint `https://api.typesafe.ai/v1/systemone` and
 
 ## About Jev
 
-Open **About Jev** or visit `/jev` for a five-slide briefing on the public model interface, input limits, output types, TypeSafe's published speed/pricing example, and what its accuracy evidence does and does not establish. The source links are on the relevant slides. A live synthetic roster-to-vendor example sends five Choice questions in one JEV request, shows measured latency and returned token usage, computes accuracy against five hand-labeled records, and routes low-confidence or unmatched choices to review. No vendor record is changed. The key stays server-side; no paid call occurs until **Run live vendor mapping** is clicked. Reported provider figures can change, so check the linked sources for current pricing.
+Open **About Jev** or visit `/jev` for a five-slide briefing on the public model interface, our **explicitly unverified** hypothesis about a shared state representation and typed decision outputs, input limits, output types, TypeSafe's published speed/pricing example, and accuracy evidence. TypeSafe has not published Jev's layer design, parameter count, or full training recipe. The source links are on the relevant slides; published prices and speed figures may change.
+
+## Agent component
+
+Open **Agent component** or visit `/agent` to compare JEV, OpenAI, DeepSeek, and a BERT-family matching baseline on the same five synthetic roster-to-vendor records. The answer key is hand-labeled and never sent to providers. JEV sends five Choice questions over one shared state in **one request**, and the UI shows every returned probability. OpenAI and DeepSeek each return five constrained vendor labels in one JSON response; their probabilities are not invented. BERT uses [Xenova/all-MiniLM-L6-v2](https://huggingface.co/Xenova/all-MiniLM-L6-v2) sentence embeddings in a browser worker, compares cosine similarity, and applies a 0.55 unmatched threshold in code. Similarity is not a calibrated probability. Its model-load time is displayed separately from inference time.
+
+Select methods and click **Run comparison** to make the calls. No paid call or model download happens on opening the page. Results show accuracy on the five records, time, token usage where available, and individual decisions. JEV's cost is estimated from its published input-token rate; OpenAI/DeepSeek costs are not estimated because configured models and pricing vary. The JEV confidence slider changes auto-match versus review routing without making another call. This small example demonstrates the component interface, not broad model superiority. API keys remain server-side and no vendor record is modified.
 
 ## JEV notebook
 
@@ -58,7 +64,7 @@ No JEV/LLM calls are made during tests. For an optional real BERT check that dow
 npm run smoke:bert
 ```
 
-With the dev server running, `npm run smoke:worker` loads the complete served worker module graph in a window-free JavaScript context. It checks worker initialization and message handling without downloading weights or making paid calls. This catches framework rewrites of runtime guards in both BERT dependencies and Vite’s HMR client.
+With the dev server running, `npm run smoke:worker` loads the complete served worker module graph in a window-free JavaScript context. It checks both the notebook and agent BERT workers, including initialization without a window, without downloading weights or making paid calls. This catches framework rewrites of runtime guards in both BERT dependencies and Vite’s HMR client.
 
 The browser notebook always runs fresh measurements; the smoke check does not prefill its results.
 

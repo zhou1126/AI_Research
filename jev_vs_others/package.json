@@ -19,7 +19,7 @@
     "smoke:local": "node scripts/http-local-smoke.mjs",
     "verify": "npm test && npm run typecheck && npm run build",
     "smoke:bert": "node --import tsx scripts/smoke-bert.mjs",
-    "smoke:worker": "node --experimental-vm-modules scripts/smoke-worker.mjs"
+    "smoke:worker": "node --experimental-vm-modules scripts/smoke-worker.mjs && node --experimental-vm-modules scripts/smoke-worker.mjs --vendor"
   },
   "dependencies": {
     "@huggingface/transformers": "3.8.1",

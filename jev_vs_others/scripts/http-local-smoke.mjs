@@ -13,6 +13,11 @@ assert.match(await notebookPage.text(), /Three basic JEV functions/);
 const overviewPage = await fetch(base + '/jev');
 assert.equal(overviewPage.status, 200);
 assert.match(await overviewPage.text(), /JEV MODEL BRIEFING/);
+const agentPage = await fetch(base + '/agent');
+assert.equal(agentPage.status, 200);
+assert.match(await agentPage.text(), /AGENT COMPONENT/);
+const invalidCompare = await fetch(base + '/api/vendor-compare', { method: 'POST', headers: { Origin: base, 'Content-Type': 'application/json' }, body: JSON.stringify({ engine: 'invalid' }) });
+assert.equal(invalidCompare.status, 400);
 const invalidOverview = await fetch(base + '/api/jev-overview', { method: 'POST', headers: { Origin: base, 'Content-Type': 'application/json' }, body: JSON.stringify({ mode: 'invalid' }) });
 assert.equal(invalidOverview.status, 400);
 const invalidNotebook = await fetch(base + '/api/notebook', { method: 'POST', headers: { Origin: base, 'Content-Type': 'application/json' }, body: JSON.stringify({ mode: 'classify', engine: 'jev', id: 'not-a-question' }) });
@@ -43,7 +48,7 @@ for (const engine of ['random', 'mcts']) {
 }
 const forbidden = await fetch(base + '/api/analyze', { method: 'POST', headers: { Origin: 'https://unrelated.example' }, body: '{}' });
 assert.equal(forbidden.status, 403);
-console.log('Local HTTP checks passed: Jev briefing, chess, room and notebook pages, demo validation, rules introduction, bundled room images, random, streamed chess/room MCTS, origin rejection. No provider API calls made.');
+console.log('Local HTTP checks passed: Jev briefing, agent comparison, chess, room and notebook pages, demo validation, rules introduction, bundled room images, random, streamed chess/room MCTS, origin rejection. No provider API calls made.');
 if (process.env.SMOKE_EXTERNAL_ORIGIN) {
   const response = await fetch(base + '/api/analyze', { method: 'POST', headers: { Origin: process.env.SMOKE_EXTERNAL_ORIGIN, 'Content-Type': 'application/json' }, body: JSON.stringify({ engine: 'random', position }) });
   assert.equal(response.status, 200, 'The configured forwarded origin must pass framework and API checks.');

@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { runInNewContext, runInContext, createContext, SourceTextModule } from 'node:vm';
 import { webcrypto } from 'node:crypto';
 const base = process.env.SMOKE_BASE_URL || 'http://localhost:3000';
-const client = await fetch(new URL('/lib/notebook/bert-client.ts', base));
+const vendor = process.argv.includes('--vendor');
+const client = await fetch(new URL(vendor ? '/lib/vendor/bert-client.ts' : '/lib/notebook/bert-client.ts', base));
 assert.equal(client.status, 200);
 const source = (await client.text()).split('//# sourceMappingURL')[0];
 const importPath = source.match(/import\s+BertWorker\s+from\s+["']([^"']+)["']/)?.[1];
@@ -73,7 +74,13 @@ try {
   await module.evaluate({ timeout: 15000 });
   assert.equal(runInContext('typeof window', context), 'undefined');
   assert.equal(runInContext('typeof self.onmessage', context), 'function');
-  // Exercise the message handler without downloading a model or invoking a provider.
+  // The vendor worker loads on first message; check bootstrap only, without a model download.
+  if (vendor) {
+    assert.match(entrySource, /all-MiniLM-L6-v2/);
+    console.log(`Vendor BERT worker bootstrap passed: ${modules.size} served modules evaluated without window. No model download or paid calls.`);
+    process.exit(0);
+  }
+  // Exercise the notebook handler without downloading a model or invoking a provider.
   await runInContext('self.onmessage({ data: { id: 1, kind: "predict", text: "test" } })', context);
   assert.equal(messages.at(-1)?.type, 'error');
   assert.match(messages.at(-1)?.message, /BERT inference failed/);
