@@ -35,7 +35,7 @@ export function JevPlayground({ model, configured, disabled, onBusyChange }: { m
     } catch (cause) { if (!abort.signal.aborted) setError(cause instanceof Error ? cause.message : 'JEV playground request failed.'); }
     finally { controller.current = null; setBusy(false); onBusyChange(false); }
   }
-  return <section className="panel notebook-cell playground-cell"><span className="cell-number">[1] BUILD YOUR OWN REQUEST</span><h2>Start with any statement</h2>
+  return <section id="jev-playground" className="panel notebook-cell playground-cell"><span className="cell-number">[2] BUILD YOUR OWN REQUEST</span><h2>Start with any statement</h2>
     <p>Describe a support message, product, applicant, situation, or anything you want Jev to judge. Add one or more narrow questions. The TypeSafe JSON below updates as you type; Run sends all valid questions in one call.</p>
     <label>State / statement<textarea aria-label="Playground statement" rows={4} maxLength={5000} value={draft.state} disabled={locked} onChange={event => update(previous => ({ ...previous, state: event.target.value }))}/></label>
     <div className="playground-toolbar"><span>Questions · {draft.questions.length}/8</span><button disabled={locked || draft.questions.length >= 8} onClick={() => addQuestion('choice')}>+ Choice</button><button disabled={locked || draft.questions.length >= 8} onClick={() => addQuestion('score')}>+ Score</button><button disabled={locked || draft.questions.length >= 8} onClick={() => addQuestion('noul')}>+ Noul</button></div>

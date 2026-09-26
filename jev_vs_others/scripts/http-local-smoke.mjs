@@ -10,6 +10,8 @@ assert.equal((await fetch(base)).status, 200);
 const notebookPage = await fetch(base + '/notebook');
 assert.equal(notebookPage.status, 200);
 const notebookHtml = await notebookPage.text();
+assert.match(notebookHtml, /Build with the TypeSafe agent skill/);
+assert.match(notebookHtml, /typesafe-ai\/skills\/blob\/main\/skills\/typesafe-ai\/SKILL.md/);
 assert.match(notebookHtml, /Start with any statement/);
 assert.match(notebookHtml, /Live TypeSafe request JSON/);
 assert.match(notebookHtml, /Three basic JEV functions/);
