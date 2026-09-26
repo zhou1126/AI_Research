@@ -13,6 +13,21 @@ export const ROSTER = [
   { id: 'r03', entry: 'Atlas Audio Visual', service: 'Projection and microphones', expected: 'v03' },
   { id: 'r04', entry: 'Green Line Shuttles', service: 'Airport transfers', expected: 'v04' },
   { id: 'r05', entry: 'Northstar Security', service: 'Security patrol', expected: 'unmatched' },
+  { id: 'r06', entry: 'North Star Catering Company', service: 'Conference breakfast', expected: 'v01' },
+  { id: 'r07', entry: 'Northstar Catering Co.', service: 'Gala dinner', expected: 'v01' },
+  { id: 'r08', entry: 'Northstar Catering - Event Meals', service: 'On-site buffet service', expected: 'v01' },
+  { id: 'r09', entry: 'Blue Harbor Security', service: 'Door guards', expected: 'v02' },
+  { id: 'r10', entry: 'Blue Harbour Security Ltd.', service: 'Night watch', expected: 'v02' },
+  { id: 'r11', entry: 'Blue Harbor Sec.', service: 'Venue access control', expected: 'v02' },
+  { id: 'r12', entry: 'Atlas A/V Services', service: 'Stage sound', expected: 'v03' },
+  { id: 'r13', entry: 'Atlas Audio-Visual Services', service: 'Projectors and screens', expected: 'v03' },
+  { id: 'r14', entry: 'Atlas AV', service: 'Conference microphones', expected: 'v03' },
+  { id: 'r15', entry: 'Greenline Transport Co.', service: 'Shuttle buses', expected: 'v04' },
+  { id: 'r16', entry: 'Green Line Transport', service: 'Hotel transfers', expected: 'v04' },
+  { id: 'r17', entry: 'Greenline Ground Transport', service: 'Local vehicle service', expected: 'v04' },
+  { id: 'r18', entry: 'Atlas Catering', service: 'Event meals', expected: 'unmatched' },
+  { id: 'r19', entry: 'Blue Harbor AV', service: 'Projection services', expected: 'unmatched' },
+  { id: 'r20', entry: 'Greenline Security', service: 'Venue patrol', expected: 'unmatched' },
 ] as const;
 
 export const VENDOR_OPTIONS = [...VENDORS.map(vendor => vendor.id), 'unmatched'] as const;
