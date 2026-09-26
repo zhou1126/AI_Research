@@ -37,7 +37,7 @@ JEV defaults to the official endpoint `https://api.typesafe.ai/v1/systemone` and
 
 ## About Jev
 
-Open **About Jev** or visit `/jev` for a five-slide briefing on the public model interface, our **explicitly unverified** hypothesis about a shared state representation and typed decision outputs, input limits, output types, TypeSafe's published speed/pricing example, and accuracy evidence. TypeSafe has not published Jev's layer design, parameter count, or full training recipe. The source links are on the relevant slides; published prices and speed figures may change.
+Open **About Jev** or visit `/jev` for a six-slide briefing on TypeSafe’s System One concept, the public model interface, our **explicitly unverified** hypothesis about a shared state representation and typed decision outputs, input limits, output types, TypeSafe's published speed/pricing example, and accuracy evidence. TypeSafe has not published Jev's layer design, parameter count, or full training recipe. The source links are on the relevant slides; published prices and speed figures may change.
 
 ## Agent component
 

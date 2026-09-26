@@ -50,6 +50,11 @@ test('About Jev presents the architecture as a hypothesis and links to the agent
   try {
     assert.ok(renderer.root.findAllByType('a').some(node => node.props.href === '/jev' && node.props['aria-current'] === 'page'));
     assert.ok(renderer.root.findAllByType('a').some(node => node.props.href === '/agent'));
+    const systemOne = renderer.root.findAllByType('button').find(node => label(node) === 'System One concept')!;
+    await act(async () => systemOne.props.onClick());
+    assert.match(label(renderer.root), /Fast, focused judgments inside a larger workflow/);
+    assert.match(label(renderer.root), /parallel and in isolation/);
+    assert.ok(renderer.root.findAllByType('a').some(node => node.props.href === 'https://docs.typesafe.ai/introduction'));
     const hypothesis = renderer.root.findAllByType('button').find(node => label(node) === 'Our model hypothesis')!;
     await act(async () => hypothesis.props.onClick());
     assert.match(label(renderer.root), /not a verified network diagram/i);

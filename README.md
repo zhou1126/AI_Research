@@ -6,7 +6,7 @@ Research applications and reproducible experiments.
 
 The application is in [`jev_vs_others/`](jev_vs_others/README.md).
 
-- **About Jev** — slide-style briefing on the public model interface, pricing and accuracy evidence, plus an explicitly unverified hypothesis about its structure.
+- **About Jev** — slide-style briefing on TypeSafe’s System One concept, the public model interface, pricing and accuracy evidence, plus an explicitly unverified hypothesis about its structure.
 - **JEV notebook** — runnable Choice, Score and Noul examples; compare JEV, OpenAI/DeepSeek and FinBERT on 50 labeled classification questions, with runtime and quality metrics.
 - **Agent component** — compare JEV, OpenAI, DeepSeek and a BERT-family embedding baseline on synthetic roster-to-vendor mapping, including Jev’s parallel Choice questions and probabilities.
 - **Chess lab** — legal chess with JEV, LLMs and MCTS, inspectable decisions, book retrieval and repeated-game experiments.
