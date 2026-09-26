@@ -7,14 +7,14 @@ A local research app with three tabs: chess comparisons, room-planning experimen
 Node 22.13+ is required.
 
 ```sh
-cd jev_vs_others # from the AI_Research repository root; Codespaces opens this folder automatically
+cd chess-lab # only when starting in the parent research workspace; a GitHub clone is already at the app root
 npm ci
 npm run dev -- --host 127.0.0.1
 ```
 
 Open http://localhost:3000. Port 3000 is fixed; stop another server using that port before starting a second instance.
 
-The app supports environment variables (including Codespaces secrets), an app-folder `.env`, or the parent repository `../.env`. Precedence is environment > app `.env` > parent `.env`. All files are optional. Before starting, the app writes **only allowlisted chess variables** plus its trusted external origin into ignored, server-only `.dev.vars`. Restart after changing keys or models. Unrelated finance keys, GitHub tokens and database settings are not copied. The generated file is refreshed on every start, so removed settings cannot survive as stale secrets. See `.env.example` for supported names. The existing `DEEP_SEEK_*` spelling and `DEEPSEEK_*` aliases both work.
+The app supports environment variables (including Codespaces secrets), a repository-root `.env`, or the existing parent `../.env`. Precedence is environment > repository `.env` > parent `.env`. All files are optional. Before starting, the app writes **only allowlisted chess variables** plus its trusted external origin into ignored, server-only `.dev.vars`. Restart after changing keys or models. Unrelated finance keys, GitHub tokens and database settings are not copied. The generated file is refreshed on every start, so removed settings cannot survive as stale secrets. See `.env.example` for supported names. The existing `DEEP_SEEK_*` spelling and `DEEPSEEK_*` aliases both work.
 
 JEV defaults to the official endpoint `https://api.typesafe.ai/v1/systemone` and model `jev-latest`. Override with `JEV_API_URL` / `JEV_MODEL`. OpenAI and DeepSeek use the model names in your `.env`; no model substitution is performed by the app. Providers may resolve aliases to another version, recorded in decisions. Keys never go to the browser or exports. Local keys are not automatically uploaded to hosting.
 
@@ -39,7 +39,7 @@ JEV defaults to the official endpoint `https://api.typesafe.ai/v1/systemone` and
 
 Open **JEV notebook** in the navigation or visit `/notebook`. This is a notebook-style UI with numbered input/output cells, not an arbitrary Python execution service.
 
-- **Run JEV example** sends one server-side request for Choice (sentiment), Score (financial outlook, levels 0–2), and Noul (whether sales/revenue growth is reported). Edit the statement, inspect the Python HTTP example, and see the actual returned answers and elapsed round-trip time. Credentials remain server-side. Shapes follow the official [Choice](https://docs.typesafe.ai/primitives/choice), [Score](https://docs.typesafe.ai/primitives/score), and [Noul](https://docs.typesafe.ai/primitives/noul) documentation.
+- **Run basic Choice** starts with one question and four steps: set the statement, define categories, send one request, and read the choice and probabilities. The cell shows the exact request, a live answer, and a copyable Node.js 22 script. **Run JEV example** then sends one request for Choice (sentiment), Score (financial outlook, levels 0–2), and Noul (whether sales/revenue growth is reported). Inspect the Python HTTP example, returned answers and elapsed round-trip time. Credentials remain server-side in the app. Shapes follow the official [Choice](https://docs.typesafe.ai/primitives/choice), [Score](https://docs.typesafe.ai/primitives/score), and [Noul](https://docs.typesafe.ai/primitives/noul) documentation.
 - **Run comparison** uses 50 original synthetic financial-sentiment statements: 17 positive, 16 neutral, 17 negative. A 5-question trial is also available. Labels were assigned when writing the examples and are not independently validated. This demonstrates measurement; it does not establish general model superiority. View the full answer key before running. It is never included in inference requests.
 - Select JEV, an LLM (OpenAI or DeepSeek), and/or BERT. The model names come from existing environment settings. OpenAI uses a strict JSON-schema enum; DeepSeek uses JSON mode with the same categories in its prompt and rejects invalid output. No LLM confidence scores are synthesized. JEV receives the same category definitions through Choice.
 - BERT is [Xenova/finbert](https://huggingface.co/Xenova/finbert), the ONNX version of ProsusAI's financial-sentiment BERT, pinned to revision `8f269abebfdd9009d7d9b5e96af7e5c6bfe50b20`, quantization `q8`. It is already fine-tuned for this domain; the remote models are prompted, so training conditions differ. Transformers.js 3.8.1 runs it in a dedicated browser worker with single-thread WASM, including when the app runs in Codespaces. It needs no API key, Python, GPU, or cross-origin isolation. The initial download is approximately 110 MB of weights plus runtime files; browser access to Hugging Face and jsDelivr is required. Nothing is downloaded merely by opening the tab. Downloads can be cached; loading time is measured separately.
@@ -188,12 +188,12 @@ Tests cover legal move generation/resulting FENs, illegal move rejection without
 
 ## GitHub Codespaces
 
-This app lives in **`AI_Research/jev_vs_others/`**. The repository-root `.devcontainer/devcontainer.json` opens that app folder and runs `npm ci` there. The repository-root `.github/workflows/jev-vs-others.yml` runs all app commands with `working-directory: jev_vs_others`. App source, images and lockfile remain together inside the folder. Credentials, downloaded weights, dependencies and generated build files are ignored.
+The Git repository is the **`chess-lab/` directory** in the current research workspace. Push its contents as the repository root, including `.devcontainer/`, `.github/`, `package.json`, and `package-lock.json`. Do not upload the surrounding `.env`, `node_modules`, `.dev.vars`, or `dist`. After cloning from GitHub you are already at the app root: do not run `cd chess-lab` again.
 
 1. In GitHub, open the repository and choose **Code > Codespaces > Create codespace on main**. The checked-in dev container uses Node 22 on Debian Bookworm and runs `npm ci` automatically.
 2. For API players, configure account or repository **Codespaces secrets** (not Actions secrets): `JEV_API_KEY`, `OPENAI_API_KEY`, `OPENAI_MODEL`, `DEEP_SEEK_API_KEY`, and `DEEP_SEEK_MODEL`. Optional settings are listed in `.env.example`. Grant the secrets access to this repository. Keep your current model names; model access depends on your provider account. JEV defaults to `jev-latest`.
-3. Alternatively, create `jev_vs_others/.env` from `jev_vs_others/.env.example` and fill it in inside the codespace. This file stays ignored. If using Codespaces secrets, no `.env` file is needed.
-4. Run `npm run dev` in the opened app folder. If your terminal is at the repository root, first run `cd jev_vs_others`. Open port **3000** from the **Ports** panel. Keep its visibility **Private** because this app uses your API credits and has no separate app login. The app does not start automatically or make paid calls when the codespace opens.
+3. Alternatively, create `.env` at the repository root from `.env.example` and fill it in inside the codespace. This file stays ignored. If using Codespaces secrets, no `.env` file is needed.
+4. Run `npm run dev`. Open port **3000** from the **Ports** panel. Keep its visibility **Private** because this app uses your API credits and has no separate app login. The app does not start automatically or make paid calls when the codespace opens.
 5. If you add/change Codespaces secrets, stop and restart the codespace to refresh its environment, then run `npm run dev` again.
 
 Codespaces' exact forwarded HTTPS hostname is derived from its environment. Vite binds to `0.0.0.0`, permits that hostname, and uses its secure WebSocket for HMR. The API accepts that explicit origin without trusting arbitrary forwarded-host headers. Outside Codespaces, `APP_ORIGIN` may be set for another trusted reverse proxy.
@@ -207,7 +207,7 @@ npm run verify
 npm run smoke:local
 ```
 
-The GitHub Actions workflow runs a clean install, tests, type checking, production build, local HTTP smoke test, worker initialization check, and a small headless benchmark on Ubuntu with Node 22. No API secrets are required for CI. Actual remote API checks remain opt-in with `npm run smoke:providers`.
+The GitHub Actions workflow runs a clean install, tests, type checking, production build, local HTTP smoke test, and a small headless benchmark on Ubuntu with Node 22. No API secrets are required for CI. Actual remote API checks remain opt-in with `npm run smoke:providers`.
 
 References: [GitHub Node.js dev containers](https://docs.github.com/en/codespaces/setting-up-your-project-for-codespaces/adding-a-dev-container-configuration/setting-up-your-nodejs-project-for-codespaces), [Codespaces secrets](https://docs.github.com/en/codespaces/managing-your-codespaces/managing-your-account-specific-secrets-for-github-codespaces).
 

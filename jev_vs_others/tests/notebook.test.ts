@@ -73,15 +73,20 @@ test('server adapters send shared text, protect keys, use constraints, and redac
 test('notebook API validates requests before any provider call and uses server question text', async () => {
   const original = globalThis.fetch, old = process.env.JEV_API_KEY; let calls = 0;
   process.env.JEV_API_KEY = 'fixture';
-  globalThis.fetch = async (_url, init) => { calls++; const body = JSON.parse(init!.body as string); assert.equal(body.state, EXAMPLES[0].text); assert.ok(!JSON.stringify(body).includes('expected')); return Response.json(jevResponse()); };
+  globalThis.fetch = async (_url, init) => { calls++; const body = JSON.parse(init!.body as string); assert.equal(body.state, calls === 1 ? EXAMPLES[0].text : 'Sales rose.'); assert.equal(Object.keys(body.questions).length, 1); assert.ok(!JSON.stringify(body).includes('expected')); return Response.json(jevResponse()); };
   const request = (body: unknown, origin = 'http://localhost:3000') => new Request('http://localhost:3000/api/notebook', { method: 'POST', headers: { Origin: origin }, body: JSON.stringify(body) });
   try {
     assert.equal((await POST(request({}, 'https://unrelated.example'))).status, 403);
-    for (const body of [{ mode: 'classify', engine: 'bert', id: 'q01' }, { mode: 'classify', engine: 'jev', id: 'missing' }, { mode: 'demo', engine: 'jev', text: '' }, { mode: 'demo', engine: 'openai', text: 'test' }]) assert.equal((await POST(request(body))).status, 400);
+    for (const body of [{ mode: 'classify', engine: 'bert', id: 'q01' }, { mode: 'classify', engine: 'jev', id: 'missing' }, { mode: 'basic', engine: 'jev', text: '' }, { mode: 'basic', engine: 'openai', text: 'test' }, { mode: 'demo', engine: 'jev', text: '' }, { mode: 'demo', engine: 'openai', text: 'test' }]) assert.equal((await POST(request(body))).status, 400);
     assert.equal(calls, 0);
     const response = await POST(request({ mode: 'classify', engine: 'jev', id: 'q01', text: 'Override', expected: 'negative' }));
     assert.equal(response.status, 200); assert.equal(calls, 1);
     assert.equal((await response.json() as { prediction: string }).prediction, 'positive');
+    const basic = await POST(request({ mode: 'basic', engine: 'jev', text: 'Sales rose.' }));
+    assert.equal(basic.status, 200); assert.equal(calls, 2);
+    const basicResult = await basic.json() as { id: string; prediction: string; probabilities: Record<string, number>; response: unknown };
+    assert.equal(basicResult.id, 'basic'); assert.equal(basicResult.prediction, 'positive'); assert.deepEqual(basicResult.probabilities, probabilities);
+    assert.ok(!JSON.stringify(basicResult).includes('Authorization'));
   } finally { globalThis.fetch = original; if (old === undefined) delete process.env.JEV_API_KEY; else process.env.JEV_API_KEY = old; }
 });
 

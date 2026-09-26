@@ -8,12 +8,12 @@ export async function POST(request: Request) {
     const raw = await request.text();
     if (raw.length > 10000) throw new Error('Request is too large.');
     const input = JSON.parse(raw);
-    if (!input || !['demo', 'classify'].includes(input.mode)) throw new Error('Choose demo or classify.');
+    if (!input || !['basic', 'demo', 'classify'].includes(input.mode)) throw new Error('Choose basic, demo or classify.');
     demo = input.mode === 'demo'; engine = input.engine;
-    if (!['jev', 'openai', 'deepseek'].includes(engine) || (demo && engine !== 'jev')) throw new Error('Invalid provider.');
-    if (demo) {
+    if (!['jev', 'openai', 'deepseek'].includes(engine) || (input.mode !== 'classify' && engine !== 'jev')) throw new Error('Invalid provider.');
+    if (input.mode !== 'classify') {
       if (typeof input.text !== 'string' || !input.text.trim() || input.text.length > 2000) throw new Error('Enter 1–2000 characters of text.');
-      text = input.text; id = 'demo';
+      text = input.text; id = input.mode;
     } else {
       const example = EXAMPLES.find(item => item.id === input.id);
       if (!example) throw new Error('Unknown question.');
