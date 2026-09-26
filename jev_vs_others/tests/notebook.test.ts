@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { CRITERIA, EXAMPLES, LABELS, type Example } from '../lib/notebook/data';
-import { finbertResult, jevBody, llmBody, metrics, type Prediction } from '../lib/notebook/core';
-import { classify, parseJev, parseLlm } from '../lib/notebook/providers';
+import { finbertResult, jevBatchBody, jevBody, jevPrimitiveBody, llmBody, metrics, type Prediction } from '../lib/notebook/core';
+import { classify, classifyJevBatch, classifyJevPrimitive, parseJev, parseLlm } from '../lib/notebook/providers';
 import { runBenchmark } from '../lib/notebook/runner';
 import { POST } from '../app/api/notebook/route';
 const probabilities = { positive: .8, neutral: .15, negative: .05 };
@@ -52,6 +52,45 @@ test('typed outputs reject missing labels, malformed probability maps and trunca
   assert.throws(() => finbertResult([{ label: 'positive', score: 1 }, { label: 'positive', score: 1 }]), /duplicate/);
 });
 
+test('each JEV primitive has a one-question example and validates its own answer', async () => {
+  const original = globalThis.fetch, sent: unknown[] = [];
+  globalThis.fetch = async (_url, init) => { sent.push(JSON.parse(init!.body as string)); return Response.json(jevResponse()); };
+  try {
+    for (const primitive of ['choice', 'score', 'noul'] as const) {
+      const body = jevPrimitiveBody('Sales rose.', 'jev-test', primitive);
+      assert.equal(Object.keys(body.questions).length, 1);
+      const result = await classifyJevPrimitive('Sales rose.', primitive, { JEV_API_KEY: 'secret-fixture' });
+      assert.equal(Object.keys((result.response as { answers: object }).answers).length, 1);
+      assert.ok(!JSON.stringify(result).includes('secret-fixture'));
+    }
+    assert.equal(sent.length, 3);
+  } finally { globalThis.fetch = original; }
+});
+
+test('50 JEV Choice questions use one request and preserve each statement and answer', async () => {
+  const body = jevBatchBody(EXAMPLES, 'jev-test');
+  assert.equal(Object.keys(body.questions).length, 50);
+  assert.equal(body.state.statements.q01, EXAMPLES[0].text);
+  assert.equal(body.state.statements.q50, EXAMPLES[49].text);
+  assert.ok(Object.values(body.state.statements).every(value => typeof value === 'string'));
+  const original = globalThis.fetch; let calls = 0;
+  globalThis.fetch = async (_url, init) => {
+    calls++;
+    const sent = JSON.parse(init!.body as string);
+    assert.equal(Object.keys(sent.questions).length, 50);
+    assert.deepEqual(sent.state, body.state);
+    return Response.json({ model: 'jev-fixture', answers: Object.fromEntries(EXAMPLES.map(example => [example.id, { type: 'choice', choice: example.expected, probabilities: { positive: +(example.expected === 'positive'), neutral: +(example.expected === 'neutral'), negative: +(example.expected === 'negative') } }])) });
+  };
+  try {
+    const result = await classifyJevBatch(EXAMPLES, { JEV_API_KEY: 'secret-fixture' });
+    assert.equal(calls, 1); assert.equal(result.rows.length, 50);
+    assert.ok(result.rows.every((row, index) => row.prediction === EXAMPLES[index].expected));
+    assert.ok(!JSON.stringify(result).includes('secret-fixture'));
+    globalThis.fetch = async () => Response.json({ model: 'jev-fixture', answers: { q01: jevResponse().answers.sentiment } });
+    await assert.rejects(classifyJevBatch(EXAMPLES, { JEV_API_KEY: 'secret-fixture' }), /missing or unexpected/);
+  } finally { globalThis.fetch = original; }
+});
+
 test('server adapters send shared text, protect keys, use constraints, and redact HTTP errors', async () => {
   const original = globalThis.fetch; const bodies: Record<string, unknown>[] = [];
   globalThis.fetch = async (_url, init) => { const body = JSON.parse(init!.body as string); bodies.push(body); return Response.json(body.questions ? jevResponse() : llmResponse('{"label":"positive"}')); };
@@ -77,7 +116,7 @@ test('notebook API validates requests before any provider call and uses server q
   const request = (body: unknown, origin = 'http://localhost:3000') => new Request('http://localhost:3000/api/notebook', { method: 'POST', headers: { Origin: origin }, body: JSON.stringify(body) });
   try {
     assert.equal((await POST(request({}, 'https://unrelated.example'))).status, 403);
-    for (const body of [{ mode: 'classify', engine: 'bert', id: 'q01' }, { mode: 'classify', engine: 'jev', id: 'missing' }, { mode: 'basic', engine: 'jev', text: '' }, { mode: 'basic', engine: 'openai', text: 'test' }, { mode: 'demo', engine: 'jev', text: '' }, { mode: 'demo', engine: 'openai', text: 'test' }]) assert.equal((await POST(request(body))).status, 400);
+    for (const body of [{ mode: 'classify', engine: 'bert', id: 'q01' }, { mode: 'classify', engine: 'jev', id: 'missing' }, { mode: 'basic', engine: 'jev', text: '' }, { mode: 'basic', engine: 'openai', text: 'test' }, { mode: 'primitive', engine: 'jev', text: 'test', primitive: 'invalid' }, { mode: 'batch', engine: 'jev', ids: ['q01'] }, { mode: 'batch', engine: 'jev', ids: ['q02', 'q01', 'q03', 'q04', 'q05'] }, { mode: 'demo', engine: 'jev', text: '' }, { mode: 'demo', engine: 'openai', text: 'test' }]) assert.equal((await POST(request(body))).status, 400);
     assert.equal(calls, 0);
     const response = await POST(request({ mode: 'classify', engine: 'jev', id: 'q01', text: 'Override', expected: 'negative' }));
     assert.equal(response.status, 200); assert.equal(calls, 1);

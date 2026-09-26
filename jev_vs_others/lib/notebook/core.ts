@@ -30,6 +30,18 @@ export function jevBody(text: string, model: string, demo = false) {
     } : {}),
   } };
 }
+export type JevPrimitive = 'choice' | 'score' | 'noul';
+export const PRIMITIVE_QUESTION = { choice: 'sentiment', score: 'financial_outlook', noul: 'reports_growth' } as const;
+export function jevPrimitiveBody(text: string, model: string, primitive: JevPrimitive) {
+  const full = jevBody(text, model, true);
+  const question = PRIMITIVE_QUESTION[primitive];
+  return { ...full, questions: { [question]: full.questions[question] } };
+}
+export function jevBatchBody(examples: Example[], model: string) {
+  return { model, state: { statements: Object.fromEntries(examples.map(example => [example.id, example.text])) }, questions: Object.fromEntries(examples.map(example => [example.id, {
+    type: 'choice', instructions: `${TASK} Evaluate only the statement at \`state.statements.${example.id}\`. Ignore the other statements.`, criteria: CRITERIA,
+  }])) };
+}
 export function llmBody(text: string, model: string, engine: 'openai' | 'deepseek', budget: number) {
   return { model, messages: [
     { role: 'system', content: `${TASK}\nCategories: ${JSON.stringify(CRITERIA)}\nReturn only JSON: {"label":"positive|neutral|negative"}. No rationale or invented confidence scores.` },
